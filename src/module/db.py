@@ -27,9 +27,10 @@ class DbOperator:
         cmd_find = f"SELECT * FROM USERS WHERE USERNAME='{username}'"
         info_user = self.operator.execute(cmd_find)
         user_list = [i for i in info_user]
-        print("用户信息查找完毕:", user_list[0])
-        return user_list[0]
+        print("用户信息查找完毕:", user_list)
+        return user_list
         # self.conn.commit()
+
 
 # db = DbOperator()
 # db.find("HZ2023")
