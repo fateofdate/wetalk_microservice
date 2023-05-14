@@ -1,6 +1,6 @@
 import socket
 # import threading
-from db import DbOperator
+from db import UsrDbOperator
 from hashlib import md5
 # import time
 import re
@@ -13,7 +13,7 @@ import re
 class Grander:
     # 初始化数据库
     def __init__(self):
-        self.DbOperator = DbOperator()
+        self.DbOperator = UsrDbOperator()
 
     def _md5_pwd(self, password: str) -> str:
         """
@@ -97,13 +97,13 @@ class LoginService:
     IP_LIST = dict()
     # USER_LIST = dict()
     # USER_STATU = dict()
-    DB_SERVICE_INFO = ("0.0.0.0", 8081)
+    DB_SERVICE_INFO = ("192.168.0.13", 9092)
 
     def __init__(self):
         self.grander = Grander()
         print("----------守护者加载完成--------------")
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind(('0.0.0.0', 8080))
+        self.socket.bind(('0.0.0.0', 9091))
         print("--------socket服务器初始化完成--------")
 
     def _error_send(self,
@@ -157,22 +157,26 @@ class LoginService:
         :return:
         """
         data, ip_port = self._recv()
-        self.IP_LIST[data[0]] = ip_port
-        data = data.decode("utf-8")
-        username = re.findall("#(.*?)@", data)
-        print(username)
-        password = re.findall("@(.*)", data)
-        print(password)
-        if len(username[0]) == 0 or len(password[0]) == 0:
-            self.socket.sendto("用户名和密码不能为空".encode("utf-8"), ip_port)
-            return
-        # print(self.grander.verify_users(username[0], password[0]))
-        if self.grander.verify_users(username[0], password[0]):    # 这里写DB的微服务组
-            # self.socket.sendto(bytes(1), self.DB_SERVICE_INFO)
-            print("登录成功")
-            self.socket.sendto("登录成功".encode("utf-8"), ip_port)
-        else:
-            self.socket.sendto("登录失败".encode("utf-8"), ip_port)
+        try:
+            ip, port = ip_port
+            self.IP_LIST[data[0]] = ip_port
+            data = data.decode("utf-8")
+            username = re.findall("#(.*?)@", data)
+            print(username)
+            password = re.findall("@(.*)", data)
+            print(password)
+            if len(username[0]) == 0 or len(password[0]) == 0:
+                self.socket.sendto("用户名和密码不能为空".encode("utf-8"), ip_port)
+                return
+            # print(self.grander.verify_users(username[0], password[0]))
+            if self.grander.verify_users(username[0], password[0]):    # 这里写DB的微服务组
+                self.socket.sendto(f"#{username[0]}@{ip}%{port}%".encode("utf-8"), self.DB_SERVICE_INFO)
+                print("登录成功")
+                self.socket.sendto("登录成功".encode("utf-8"), ip_port)
+            else:
+                self.socket.sendto("登录失败".encode("utf-8"), ip_port)
+        except IndexError:
+            print(data)
         #     pass
         # self._send_data(ip_port, bytes(1))
 

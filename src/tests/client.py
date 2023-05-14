@@ -2,13 +2,17 @@ import socket
 import threading
 
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-client.bind(('192.168.0.13', 9090))
-client.connect(('192.168.0.13', 8080))
+client.bind(('192.168.0.13', 8080))
+# client.bind(('192.168.0.13', 8081))
+# client.connect(('192.168.0.13', 9091))
+client.connect(('192.168.0.13', 9091))
 # client.connect(('47.236.23.14', 3389))
-send_address = ('192.168.0.13', 8080)
+send_address = ('192.168.0.13', 9091)
 # send_address = ('47.236.23.14', 3389)
 
 while True:
+    # data = client.recv(1024).decode("utf-8")
+    # print(data)
     username = input("输入用户名")
     password = input("输入密码")
     package = f"#{username}@{password}"

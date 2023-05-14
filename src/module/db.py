@@ -1,7 +1,7 @@
 import sqlite3
 
 
-class DbOperator:
+class UsrDbOperator:
     def __init__(self):
         self.conn = sqlite3.connect('../../data/server.db')
         self.operator = self.conn.cursor()
@@ -32,6 +32,53 @@ class DbOperator:
         # self.conn.commit()
 
 
+class TmpDbOperator:
+    """
+    TMP 数据库操作父类由 db_service 服务中的service类继承
+    """
+    def __init__(self):
+        self.conn_tmp = sqlite3.connect('../../data/tmp.db')
+        self.curr_tmp = self.conn_tmp.cursor()
+
+    def find(self, username) -> list:
+        cmd_tmp_find = f"""
+        SELECT * FROM TMP WHERE USERNAME = '{username}'
+        """
+        db_object = self.curr_tmp.execute(cmd_tmp_find)
+        usr_ip_port = [info for info in db_object]
+        return usr_ip_port
+
+    def change(self):
+        pass
+
+    def add(self,
+            username: str,
+            ip_port: tuple):
+        """
+
+        :param username:
+        :param ip_port:
+        :return:
+        """
+        ip, port = ip_port
+        cmd_tmp_add = f"""
+        INSERT INTO TMP (USERNAME, IP, PORT) VALUES ('{username}', '{ip}', '{port}');
+        """
+        self.curr_tmp.execute(cmd_tmp_add)
+        self.conn_tmp.commit()
+        print(f"用户态增加成功:{username}, {ip}, {port}")
+
+    def delete(self, username: str):
+        cmd_tmp_delete = f"""
+        DELETE FROM TMP WHERE USERNAME = '{username}';
+        """
+        self.curr_tmp.execute(cmd_tmp_delete)
+        self.conn_tmp.commit()
+        print(f"用户态删除成功:{username}")
+
+# db = TmpDbOperator()
+
+# db.add('lyk', ('10.2.2.1', 9092))
 # db = DbOperator()
 # db.find("HZ2023")
 # db.delete(4)
