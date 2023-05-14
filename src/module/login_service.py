@@ -31,8 +31,9 @@ class Grander:
         :param username: 用户名
         :return: 返回一个元组类型 (ID, 用户名, 密码哈希值, 权限组)
         """
-        if len(self.DbOperator.find(username)) != 0:
-            return self.DbOperator.find(username)[0]
+        user_info = self.DbOperator.find(username)
+        if len(user_info) != 0:
+            return user_info
         else:
             not_user = (0,)
             return not_user
@@ -46,11 +47,12 @@ class Grander:
         :param password: 用户传入的密码
         :return: 返回是否登录 True为登录, False为禁止登录
         """
-        if self._get_users_info(username)[0] == 0:
+        user_info = self._get_users_info(username)
+        if user_info[0] == 0:
             return False
-        if len(self._get_users_info(username)) != 0:
-            print(len(self._get_users_info(username)))
-            _, username_db, pwd_md5, _ = self._get_users_info(username)
+        if len(user_info) != 0:
+            # print(len(self._get_users_info(username)))
+            _, username_db, pwd_md5, _ = user_info[0]
             if pwd_md5 == self._md5_pwd(password):
                 return True
             return False
